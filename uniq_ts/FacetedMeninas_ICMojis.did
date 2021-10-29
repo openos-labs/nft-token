@@ -1,0 +1,272 @@
+type User = 
+ variant {
+   address: AccountIdentifier;
+   "principal": principal;
+ };
+type TransferResponse_2 = Result;
+type TransferResponse = TransferResponse_2;
+type TransferRequest_2 = 
+ record {
+   amount: Balance;
+   from: User;
+   memo: Memo;
+   notify: bool;
+   subaccount: opt SubAccount;
+   to: User;
+   token: TokenIdentifier;
+ };
+type TransferRequest = TransferRequest_2;
+type Transaction = 
+ record {
+   buyer: AccountIdentifier_3;
+   price: nat64;
+   seller: principal;
+   time: Time;
+   token: TokenIdentifier_2;
+ };
+type TokenIndex_2 = nat32;
+type TokenIndex = TokenIndex_2;
+type TokenIdentifier_2 = TokenIdentifier;
+type TokenIdentifier = text;
+type Time_2 = int;
+type Time = Time_2;
+type SubAccount_3 = SubAccount;
+type SubAccount_2 = vec nat8;
+type SubAccount = SubAccount_2;
+type Settlement = 
+ record {
+   buyer: AccountIdentifier_3;
+   price: nat64;
+   seller: principal;
+   subaccount: SubAccount_3;
+ };
+type Result_9 = 
+ variant {
+   err: CommonError_2;
+   ok: Balance;
+ };
+type Result_8 = 
+ variant {
+   err: CommonError;
+   ok: record {
+         AccountIdentifier_3;
+         opt Listing;
+       };
+ };
+type Result_7 = 
+ variant {
+   err: CommonError;
+   ok: AccountIdentifier_3;
+ };
+type Result_6 = 
+ variant {
+   err: CommonError;
+   ok: Metadata;
+ };
+type Result_5 = 
+ variant {
+   err: CommonError;
+   ok;
+ };
+type Result_4 = 
+ variant {
+   err: CommonError;
+   ok: Balance_2;
+ };
+type Result_3 = 
+ variant {
+   err: CommonError;
+   ok: vec TokenIndex;
+ };
+type Result_2 = 
+ variant {
+   err: CommonError;
+   ok: vec record {
+             TokenIndex;
+             opt Listing;
+             opt blob;
+           };
+ };
+type Result = 
+ variant {
+   err:
+    variant {
+      CannotNotify: AccountIdentifier;
+      InsufficientBalance;
+      InvalidToken: TokenIdentifier;
+      Other: text;
+      Rejected;
+      Unauthorized: AccountIdentifier;
+    };
+   ok: Balance;
+ };
+type MintRequest_2 = 
+ record {
+   metadata: opt blob;
+   to: User;
+ };
+type MintRequest = MintRequest_2;
+type Metadata_2 = 
+ variant {
+   fungible:
+    record {
+      decimals: nat8;
+      metadata: opt blob;
+      name: text;
+      symbol: text;
+    };
+   nonfungible: record {metadata: opt blob;};
+ };
+type Metadata = Metadata_2;
+type Memo = blob;
+type Listing = 
+ record {
+   locked: opt Time;
+   price: nat64;
+   seller: principal;
+ };
+type ListRequest = 
+ record {
+   from_subaccount: opt SubAccount_3;
+   price: opt nat64;
+   token: TokenIdentifier_2;
+ };
+type HttpStreamingStrategy = variant {
+                               Callback:
+                                record {
+                                  callback:
+                                   func (HttpStreamingCallbackToken) ->
+                                    (HttpStreamingCallbackResponse) query;
+                                  token: HttpStreamingCallbackToken;
+                                };};
+type HttpStreamingCallbackToken = 
+ record {
+   content_encoding: text;
+   index: nat;
+   key: text;
+   sha256: opt blob;
+ };
+type HttpStreamingCallbackResponse = 
+ record {
+   body: blob;
+   token: opt HttpStreamingCallbackToken;
+ };
+type HttpResponse = 
+ record {
+   body: blob;
+   headers: vec HeaderField;
+   status_code: nat16;
+   streaming_strategy: opt HttpStreamingStrategy;
+ };
+type HttpRequest = 
+ record {
+   body: blob;
+   headers: vec HeaderField;
+   method: text;
+   url: text;
+ };
+type HeaderField = 
+ record {
+   text;
+   text;
+ };
+type File = 
+ record {
+   ctype: text;
+   data: vec blob;
+ };
+type Extension_2 = text;
+type Extension = Extension_2;
+type CommonError_2 = 
+ variant {
+   InvalidToken: TokenIdentifier;
+   Other: text;
+ };
+type CommonError = CommonError_2;
+type Balance_2 = Balance;
+type BalanceResponse_2 = Result_9;
+type BalanceResponse = BalanceResponse_2;
+type BalanceRequest_2 = 
+ record {
+   token: TokenIdentifier;
+   user: User;
+ };
+type BalanceRequest = BalanceRequest_2;
+type Balance = nat;
+type Asset = 
+ record {
+   name: text;
+   payload: File;
+   thumbnail: opt File;
+ };
+type AccountIdentifier_3 = AccountIdentifier;
+type AccountIdentifier_2 = text;
+type AccountIdentifier = AccountIdentifier_2;
+service : {
+  TEMPaddPayment: (text, principal, SubAccount_3) -> ();
+  TEMPusedAddresses: (text) ->
+   (vec record {
+          AccountIdentifier_3;
+          principal;
+          SubAccount_3;
+        });
+  acceptCycles: () -> ();
+  addAsset: (Asset) -> (nat);
+  allPayments: () -> (vec record {
+                            principal;
+                            vec SubAccount_3;
+                          }) query;
+  allSettlements: () -> (vec record {
+                               TokenIndex;
+                               Settlement;
+                             }) query;
+  availableCycles: () -> (nat) query;
+  balance: (BalanceRequest) -> (BalanceResponse) query;
+  bearer: (TokenIdentifier_2) -> (Result_7) query;
+  clearPayments: (principal, vec SubAccount_3) -> ();
+  details: (TokenIdentifier_2) -> (Result_8) query;
+  extensions: () -> (vec Extension) query;
+  getMinter: () -> (principal) query;
+  getRegistry: () -> (vec record {
+                            TokenIndex;
+                            AccountIdentifier_3;
+                          }) query;
+  getTokens: () -> (vec record {
+                          TokenIndex;
+                          Metadata;
+                        }) query;
+  http_request: (HttpRequest) -> (HttpResponse) query;
+  http_request_streaming_callback: (HttpStreamingCallbackToken) ->
+   (HttpStreamingCallbackResponse) query;
+  list: (ListRequest) -> (Result_5);
+  listings: () -> (vec record {
+                         TokenIndex;
+                         Listing;
+                         Metadata;
+                       }) query;
+  lock: (TokenIdentifier_2, nat64, AccountIdentifier_3, SubAccount_3) ->
+   (Result_7);
+  metadata: (TokenIdentifier_2) -> (Result_6) query;
+  mintAndList: (AccountIdentifier_3, opt blob, nat64, text) -> (TokenIndex);
+  mintNFT: (MintRequest) -> (TokenIndex);
+  payments: () -> (opt vec SubAccount_3) query;
+  refunds: () -> (opt vec SubAccount_3) query;
+  removePayments: (vec SubAccount_3) -> ();
+  removeRefunds: (vec SubAccount_3) -> ();
+  setMinter: (principal) -> ();
+  settle: (TokenIdentifier_2) -> (Result_5);
+  settlements: () ->
+   (vec record {
+          TokenIndex;
+          AccountIdentifier_3;
+          nat64;
+        }) query;
+  streamAsset: (nat, bool, blob) -> ();
+  supply: (TokenIdentifier_2) -> (Result_4) query;
+  tokens: (AccountIdentifier_3) -> (Result_3) query;
+  tokens_ext: (AccountIdentifier_3) -> (Result_2) query;
+  transactions: () -> (vec Transaction) query;
+  transfer: (TransferRequest) -> (TransferResponse);
+  updateThumb: (text, File) -> (opt nat);
+}
+

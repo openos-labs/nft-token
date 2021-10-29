@@ -1,0 +1,60 @@
+type TokenData_2 = 
+ record {
+   contentType: text;
+   data: vec nat8;
+   id: nat;
+ };
+type TokenData = TokenData_2;
+type StreamingStrategy = variant {
+                           Callback:
+                            record {
+                              callback:
+                               func (StreamingCallbackToken) ->
+                                (StreamingCallbackResponse) query;
+                              token: StreamingCallbackToken;
+                            };};
+type StreamingCallbackToken = 
+ record {
+   content_encoding: text;
+   index: nat;
+   key: text;
+   sha256: opt blob;
+ };
+type StreamingCallbackResponse = 
+ record {
+   body: blob;
+   token: opt StreamingCallbackToken;
+ };
+type HttpResponse_2 = 
+ record {
+   body: blob;
+   headers: vec HeaderField;
+   status_code: nat16;
+   streaming_strategy: opt StreamingStrategy;
+ };
+type HttpResponse = HttpResponse_2;
+type HttpRequest_2 = 
+ record {
+   body: blob;
+   headers: vec HeaderField;
+   method: text;
+   url: text;
+ };
+type HttpRequest = HttpRequest_2;
+type HeaderField = 
+ record {
+   text;
+   text;
+ };
+service : {
+  acceptCycles: () -> ();
+  availableCycles: () -> (nat) query;
+  getImages: (text) -> (TokenData) query;
+  get_cycles: () -> (nat) query;
+  http_request: (HttpRequest) -> (HttpResponse) query;
+  owner: () -> (principal) query;
+  saveBunny: (TokenData, nat) -> (nat);
+  set_owner: (principal) -> (bool);
+  wallet_receive: () -> (record {accepted: nat64;});
+}
+
